@@ -19,6 +19,7 @@ from telegram import Update, ForceReply
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 import csv
+import math
 
 # Enable logging
 logging.basicConfig(
@@ -41,7 +42,7 @@ def start(update: Update, _: CallbackContext) -> None:
 
 def help_command(update: Update, _: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
-    update.message.reply_text('Help!')
+    update.message.reply_text('Opa, obrigado por me usar :), fale comigo da seguinte forma\n/meuaniversario dd/mm/aaaa - para cadastrar seu aniversário\n/listaraniversarios - Lista todos os aniversários cadastrados')
 
 
 def echo(update: Update, _: CallbackContext) -> None:
@@ -62,6 +63,26 @@ def my_birthday(update: Update, context: CallbackContext) -> None:
         writer = csv.DictWriter(aniversarios, fieldnames=fieldnames)
         writer.writerow({'id': user_id, 'nome': user_name, 'data': user_birthday})
 
+def list_birthdays(update: Update, context: CallbackContext) -> None:
+    """list user birthday in csv"""
+    update.message.reply_text("Os aniversários que eu sei são:\n")
+    with open('birthdays.csv', newline='') as aniversarios:
+        reader = csv.DictReader(aniversarios)
+        aniversarioslist = []
+        for row in reader:
+            aniversarioslist.append(row['nome'] + " - " + row['data'] + "\n")
+    aniversariospormensagem = 5
+    for nmensagens in range(math.floor(len(aniversarioslist)/aniversariospormensagem)):
+        mensagem = ""
+        for pormensagem in range(aniversariospormensagem):
+            mensagem = mensagem + aniversarioslist[5*nmensagens + pormensagem]
+        update.message.reply_text(mensagem)
+
+    nultimasmensagens = len(aniversarioslist) % aniversariospormensagem
+    mensagem = ""
+    for ultimasmensagens in range(nultimasmensagens):
+        mensagem = mensagem + aniversarioslist[-nultimasmensagens+ultimasmensagens]
+    update.message.reply_text(mensagem)
 
 def main() -> None:
     """Start the bot."""
@@ -78,6 +99,7 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CommandHandler("help", help_command))
     dispatcher.add_handler(CommandHandler("meuaniversario", my_birthday))
+    dispatcher.add_handler(CommandHandler("listaraniversarios", list_birthdays))
 
     # on non command i.e message - echo the message on Telegram
     dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
