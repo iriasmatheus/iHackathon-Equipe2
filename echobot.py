@@ -12,7 +12,7 @@ Basic Echobot example, repeats messages.
 Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
-
+import datetime
 import logging
 
 from telegram import Update, ForceReply
@@ -53,15 +53,23 @@ def echo(update: Update, _: CallbackContext) -> None:
 
 def my_birthday(update: Update, context: CallbackContext) -> None:
     """Write user birthday in csv"""
-    aniversario = context.args[0]
-    user = update.message.from_user
-    user_id = user.id
-    user_name = user.full_name
-    user_birthday = aniversario
-    with open('birthdays.csv', 'a', newline='') as aniversarios:
-        fieldnames = ['id','nome', 'data']
-        writer = csv.DictWriter(aniversarios, fieldnames=fieldnames)
-        writer.writerow({'id': user_id, 'nome': user_name, 'data': user_birthday})
+    if len(context.args) > 0:
+        aniversario = context.args[0]
+        try:
+            datetime.datetime.strptime(aniversario, '%d/%m/%Y')
+            user = update.message.from_user
+            user_id = user.id
+            user_name = user.full_name
+            user_birthday = aniversario
+            with open('birthdays.csv', 'a', newline='') as aniversarios:
+                fieldnames = ['id','nome', 'data']
+                writer = csv.DictWriter(aniversarios, fieldnames=fieldnames)
+                writer.writerow({'id': user_id, 'nome': user_name, 'data': user_birthday})
+            update.message.reply_text('Olá, ' + user_name + "! Eu vou lembrar do seu grande dia!")
+        except ValueError:
+            update.message.reply_text('Data no formato incorreto!')
+    else:
+        update.message.reply_text('Você deve informar uma data!')
 
 def list_birthdays(update: Update, context: CallbackContext) -> None:
     """list user birthday in csv"""
