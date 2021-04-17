@@ -13,6 +13,7 @@ Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
 import datetime
+import pytz
 import logging
 
 from telegram import Update, ForceReply
@@ -31,8 +32,11 @@ logger = logging.getLogger(__name__)
 
 # Define a few command handlers. These usually take the two arguments update and
 # context.
-def start(update: Update, _: CallbackContext) -> None:
+def start(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /start is issued."""
+    #schedule jobs
+    scheduledtime = datetime.time(hour=19, minute=51, tzinfo=pytz.timezone('America/Sao_Paulo'))
+    context.job_queue.run_daily(callbackreminder, scheduledtime, days=(0, 1, 2, 3, 4, 5, 6), context=update.message.chat_id)
     user = update.effective_user
     update.message.reply_markdown_v2(
         fr'Hi {user.mention_markdown_v2()}\!',
@@ -50,6 +54,7 @@ def echo(update: Update, _: CallbackContext) -> None:
     user = update.message.from_user
     print(user)
     update.message.reply_text(update.message.text + ", Olá ")
+    
 
 def my_birthday(update: Update, context: CallbackContext) -> None:
     """Write user birthday in csv"""
@@ -92,6 +97,17 @@ def list_birthdays(update: Update, context: CallbackContext) -> None:
         mensagem = mensagem + aniversarioslist[-nultimasmensagens+ultimasmensagens]
     context.bot.send_message(chat_id= update.effective_chat.id, text= mensagem)
 
+
+def callbackreminder(context):
+    today = datetime.date.today()
+    formated_date = today.strftime("%d/%m/%Y")
+    with open('birthdays.csv', newline='') as aniversarios:
+        reader = csv.DictReader(aniversarios)
+        aniversarioslist = []
+        for row in reader:
+            if(formated_date == row['data'])
+            context.bot.send_message(chat_id=context.job.context, text="Parabéns {0}, hoje é seu aniversário :)".format(row['nome']))
+
 def main() -> None:
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
@@ -108,6 +124,8 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("help", help_command))
     dispatcher.add_handler(CommandHandler("meuaniversario", my_birthday))
     dispatcher.add_handler(CommandHandler("listaraniversarios", list_birthdays))
+
+
 
     # on non command i.e message - echo the message on Telegram
     dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
