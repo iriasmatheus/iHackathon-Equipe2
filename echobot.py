@@ -84,13 +84,13 @@ def list_birthdays(update: Update, context: CallbackContext) -> None:
         mensagem = ""
         for pormensagem in range(aniversariospormensagem):
             mensagem = mensagem + aniversarioslist[5*nmensagens + pormensagem]
-        update.message.reply_text(mensagem)
+        context.bot.send_message(chat_id= update.effective_chat.id, text= mensagem)
 
     nultimasmensagens = len(aniversarioslist) % aniversariospormensagem
     mensagem = ""
     for ultimasmensagens in range(nultimasmensagens):
         mensagem = mensagem + aniversarioslist[-nultimasmensagens+ultimasmensagens]
-    update.message.reply_text(mensagem)
+    context.bot.send_message(chat_id= update.effective_chat.id, text= mensagem)
 
 def main() -> None:
     """Start the bot."""
