@@ -47,14 +47,9 @@ def start(update: Update, context: CallbackContext) -> None:
 def help_command(update: Update, _: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
     update.message.reply_text('Opa, obrigado por me usar :), fale comigo da seguinte forma\n/meuaniversario dd/mm/aaaa - para cadastrar seu aniversário\n/listaraniversarios - Lista todos os aniversários cadastrados')
+   
+# def delete(user_id):
 
-
-def echo(update: Update, _: CallbackContext) -> None:
-    """Echo the user message."""
-    user = update.message.from_user
-    print(user)
-    update.message.reply_text(update.message.text + ", Olá ")
-    
 
 def my_birthday(update: Update, context: CallbackContext) -> None:
     """Write user birthday in csv"""
@@ -66,11 +61,20 @@ def my_birthday(update: Update, context: CallbackContext) -> None:
             user_id = user.id
             user_name = user.full_name
             user_birthday = aniversario
-            with open('birthdays.csv', 'a', newline='') as aniversarios:
-                fieldnames = ['id','nome', 'data']
-                writer = csv.DictWriter(aniversarios, fieldnames=fieldnames)
-                writer.writerow({'id': user_id, 'nome': user_name, 'data': user_birthday})
-            update.message.reply_text('Olá, ' + user_name + "! Eu vou lembrar do seu grande dia!")
+            with open('birthdays.csv', newline='') as aniversarios:
+                reader = csv.DictReader(aniversarios)
+                cadastrado = 0
+                for row in reader:
+                    if(row['id'] == user.id):
+                        cadastrado = 1
+            if cadastrado == 0:
+                with open('birthdays.csv', 'a', newline='') as aniversarios:
+                    fieldnames = ['id','nome', 'data']
+                    writer = csv.DictWriter(aniversarios, fieldnames=fieldnames)
+                    writer.writerow({'id': user_id, 'nome': user_name, 'data': user_birthday})
+                update.message.reply_text('Olá, ' + user_name + "! Eu vou lembrar do seu grande dia!")
+            else:
+                #usuario ja cadastrado
         except ValueError:
             update.message.reply_text('Data no formato incorreto!')
     else:
