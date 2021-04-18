@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 def start(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /start is issued."""
     #schedule jobs
-    scheduledtime = datetime.time(hour=19, minute=51, tzinfo=pytz.timezone('America/Sao_Paulo'))
+    scheduledtime = datetime.time(hour=22, minute=10, tzinfo=pytz.timezone('America/Sao_Paulo'))
     context.job_queue.run_daily(callbackreminder, scheduledtime, days=(0, 1, 2, 3, 4, 5, 6), context=update.message.chat_id)
     user = update.effective_user
     update.message.reply_markdown_v2(
@@ -103,10 +103,9 @@ def callbackreminder(context):
     formated_date = today.strftime("%d/%m/%Y")
     with open('birthdays.csv', newline='') as aniversarios:
         reader = csv.DictReader(aniversarios)
-        aniversarioslist = []
         for row in reader:
-            if(formated_date == row['data'])
-            context.bot.send_message(chat_id=context.job.context, text="Parabéns {0}, hoje é seu aniversário :)".format(row['nome']))
+            if(formated_date[0:2] == row['data'][0:2]) and (formated_date[3:5] == row['data'][3:5]):
+                context.bot.send_message(chat_id=context.job.context, text="Parabéns {0}, hoje é seu aniversário :)".format(row['nome']))
 
 def main() -> None:
     """Start the bot."""
