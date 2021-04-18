@@ -50,7 +50,20 @@ def help_command(update: Update, _: CallbackContext) -> None:
    
 # def delete(user_id):
 
-
+def delete(user_id):
+    with open('birthdays.csv', newline='') as aniversarios:
+        reader = csv.DictReader(aniversarios)
+        aniversarioslist = []
+        for row in reader:
+            if row['id'] != user_id:
+                aniversarioslist.append(row)
+    with open('birthdays.csv', 'w', newline='') as aniversarios:
+        fieldnames = ['id', 'nome', 'data']
+        writer = csv.DictWriter(aniversarios, fieldnames=fieldnames)
+        writer.writeheader()
+        for linha in aniversarioslist:
+            writer.writerow(linha)
+            
 def my_birthday(update: Update, context: CallbackContext) -> None:
     """Write user birthday in csv"""
     if len(context.args) > 0:
