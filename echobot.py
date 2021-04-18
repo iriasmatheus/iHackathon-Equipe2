@@ -1,17 +1,3 @@
-#!/usr/bin/env python
-# pylint: disable=C0116
-# This program is dedicated to the public domain under the CC0 license.
-
-"""
-Simple Bot to reply to Telegram messages.
-First, a few handler functions are defined. Then, those functions are passed to
-the Dispatcher and registered at their respective places.
-Then, the bot is started and runs until we press Ctrl-C on the command line.
-Usage:
-Basic Echobot example, repeats messages.
-Press Ctrl-C on the command line or send a signal to the process to stop the
-bot.
-"""
 import datetime
 import pytz
 import logging
@@ -40,7 +26,6 @@ def start(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
     update.message.reply_markdown_v2(
         fr'Hi {user.mention_markdown_v2()}\!',
-        reply_markup=ForceReply(selective=True),
     )
 
 
@@ -71,23 +56,15 @@ def my_birthday(update: Update, context: CallbackContext) -> None:
         try:
             datetime.datetime.strptime(aniversario, '%d/%m/%Y')
             user = update.message.from_user
-            user_id = user.id
+            user_id = str(user.id)
             user_name = user.full_name
             user_birthday = aniversario
-            with open('birthdays.csv', newline='') as aniversarios:
-                reader = csv.DictReader(aniversarios)
-                cadastrado = 0
-                for row in reader:
-                    if(row['id'] == user.id):
-                        cadastrado = 1
-            if cadastrado == 0:
-                with open('birthdays.csv', 'a', newline='') as aniversarios:
-                    fieldnames = ['id','nome', 'data']
-                    writer = csv.DictWriter(aniversarios, fieldnames=fieldnames)
-                    writer.writerow({'id': user_id, 'nome': user_name, 'data': user_birthday})
-                update.message.reply_text('Olá, ' + user_name + "! Eu vou lembrar do seu grande dia!")
-            else:
-                #usuario ja cadastrado
+            delete(user_id)
+            with open('birthdays.csv', 'a', newline='') as aniversarios:
+                fieldnames = ['id','nome', 'data']
+                writer = csv.DictWriter(aniversarios, fieldnames=fieldnames)
+                writer.writerow({'id': user_id, 'nome': user_name, 'data': user_birthday})
+            update.message.reply_text('Olá, ' + user_name + "! Eu vou lembrar do seu grande dia!")
         except ValueError:
             update.message.reply_text('Data no formato incorreto!')
     else:
@@ -142,10 +119,6 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("meuaniversario", my_birthday))
     dispatcher.add_handler(CommandHandler("listaraniversarios", list_birthdays))
 
-
-
-    # on non command i.e message - echo the message on Telegram
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
 
     # Start the Bot
     updater.start_polling()
