@@ -104,8 +104,9 @@ def callbackreminder(context):
     with open('birthdays.csv', newline='') as aniversarios:
         reader = csv.DictReader(aniversarios)
         for row in reader:
-            if(formated_date[0:2] == row['data'][0:2]) and (formated_date[3:5] == row['data'][3:5]):
-                context.bot.send_message(chat_id=context.job.context, text="Parabéns {0}, hoje é seu aniversário :)".format(row['nome']))
+            if(formated_date[0:5] == row['data'][0:5]):
+                idade = int(formated_date[6:]) - int(row['data'][6:])
+                context.bot.send_message(chat_id=context.job.context, text="Parabéns {0}, hoje é seu aniversário de {1} anos :)".format(row['nome'], idade))
 
 def main() -> None:
     """Start the bot."""
