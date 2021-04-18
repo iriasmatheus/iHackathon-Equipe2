@@ -15,18 +15,21 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-
 # Define a few command handlers. These usually take the two arguments update and
 # context.
 def start(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /start is issued."""
     #schedule jobs
-    scheduledtime = datetime.time(hour=22, minute=10, tzinfo=pytz.timezone('America/Sao_Paulo'))
-    context.job_queue.run_daily(callbackreminder, scheduledtime, days=(0, 1, 2, 3, 4, 5, 6), context=update.message.chat_id)
+    if len(context.job_queue.jobs()) == 0:
+        scheduledtime = datetime.time(hour=1, minute=12, tzinfo=pytz.timezone('America/Sao_Paulo'))
+        context.job_queue.run_daily(callbackreminder, scheduledtime, days=(0, 1, 2, 3, 4, 5, 6), context=update.message.chat_id)
+        update.message.reply_text('Fui iniciado!\nIrei avisar quando alguém fizer aniversário :)')
+    else:
+        update.message.reply_text('Já fui iniciado!!')
 
 def help_command(update: Update, _: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
-    update.message.reply_text('Opa, obrigado por me usar :), fale comigo da seguinte forma\n/meuaniversario dd/mm/aaaa - para cadastrar seu aniversário\n/listaraniversarios - Lista todos os aniversários cadastrados')
+    update.message.reply_text('Opa, obrigado por me usar :), fale comigo da seguinte forma\n/start - Usado quando colocar o bot no canal\n/meuaniversario dd/mm/aaaa - Cadastra seu aniversário\n/listaraniversarios - Lista todos os aniversários cadastrados\n/delete - Deleta o cadastro do seu aniversário')
    
 
 def delete(user_id) -> "deleted":
@@ -119,6 +122,9 @@ def main() -> None:
     token = arquivo.read()
     arquivo.close()
     updater = Updater(token)
+
+    #create birthdays.csv if it doesn't exist or is wrong
+    delete("-1")
 
     # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
